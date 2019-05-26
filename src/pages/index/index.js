@@ -1,9 +1,13 @@
 import Taro, {Component} from '@tarojs/taro'
 import {View, Text, Input, Picker} from '@tarojs/components'
-import './index.scss'
 import {AtButton, AtCard, AtDivider, AtForm, AtInput, AtInputNumber, AtTabBar} from "taro-ui";
+import {Finance} from 'financejs'
 
+import './index.scss'
+
+let finance = new Finance();
 const downPaymentPercentRange = [3, 5, 7];
+
 export default class Index extends Component {
 
   config = {
@@ -64,8 +68,9 @@ export default class Index extends Component {
   }
 
   render() {
-    const {housePrice,downPaymentPercent,extraDownPayment} = this.state;
-    const totalDownPay =  housePrice*downPaymentPercent/10 + extraDownPayment;
+    const {housePrice, downPaymentPercent, extraDownPayment, loanRate, loanYears} = this.state;
+    const totalDownPay = housePrice * downPaymentPercent / 10 + extraDownPayment;
+    const pmt = finance.PMT(loanRate / 100 / 12, loanYears * 12, housePrice * (1 - downPaymentPercent / 10))
 
     return (
       <View className='index'>
@@ -170,7 +175,7 @@ export default class Index extends Component {
         <AtButton type='primary'>点击计算</AtButton>
 
         <Text> 所有首付： {totalDownPay} </Text>
-        
+        <Text> 每月供款: {pmt} </Text>
       </View>
     )
   }

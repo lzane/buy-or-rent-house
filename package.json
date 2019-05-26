@@ -28,6 +28,7 @@
     "@tarojs/taro-swan": "1.3.0-beta.5",
     "@tarojs/taro-tt": "1.3.0-beta.5",
     "@tarojs/taro-weapp": "1.3.0-beta.5",
+    "financejs": "^4.1.0",
     "nerv-devtools": "^1.4.0-beta.3",
     "nervjs": "^1.4.0-beta.3",
     "taro-ui": "^2.1.0"
