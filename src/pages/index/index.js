@@ -2,6 +2,7 @@ import Taro, {Component} from '@tarojs/taro'
 import {View, Text, Input, Picker} from '@tarojs/components'
 import {AtButton, AtCard, AtDivider, AtForm, AtInput, AtInputNumber, AtTabBar} from "taro-ui";
 import {Finance} from 'financejs'
+import fp from 'lodash/fp'
 
 import './index.scss'
 
@@ -24,6 +25,26 @@ function FV(rate, nper, pmt, pv, type) {
   }
 
   return fv;
+}
+
+function getNetAssetBuyingHouse(months,housePrice,houseIncreaseRate,loan,loanRate,pmt){
+  const loanAfterMonths = FV(loanRate / 100 / 12, months, pmt, loan);
+  const housePriceAfterMonths = FV(houseIncreaseRate / 100 / 12, months, 0, -housePrice);
+
+  return housePriceAfterMonths + loanAfterMonths;
+}
+
+function getNetAssetRentingHouse(months, rentPrice, rentIncreaseRate, pmt, principle,financeCost) {
+  if(months === 0 ){
+    return principle;
+  }
+  let acc = principle;
+  for (let i = 1; i <= months; i++) {
+    let currentRentPrice = FV(rentIncreaseRate/100/12,i,0,-rentPrice);
+    let realPmt = pmt + currentRentPrice;
+    acc = FV(financeCost/100/12,1,realPmt,-acc);
+  }
+  return acc;
 }
 
 
@@ -87,16 +108,15 @@ export default class Index extends Component {
   }
 
   render() {
-    const {loanRate, loanYears, loan, houseIncreaseRate,housePrice} = this.state;
-    const pmt = parseFloat(finance.PMT(loanRate / 100 / 12, loanYears * 12, loan).toFixed(4));
-    const months = 20*12;
-    // const housePriceAfterYears = finance.FV(this.state.houseIncreaseRate,)
+    const {loanRate, loanYears, loan, houseIncreaseRate, housePrice,rentPrice,rentIncreaseRate,downPayment,financeCost} = this.state;
+    const pmt = finance.PMT(loanRate / 100 / 12, loanYears * 12, loan);
+    const months = 12*10;
 
-    const loanAfterMonths = FV(loanRate/100/12,months,pmt,loan);
-    const housePriceAfterMonths = FV(houseIncreaseRate/100/12,months,0,-housePrice);
+    const netAssetBuyingHouse = getNetAssetBuyingHouse(months,housePrice,houseIncreaseRate,loan,loanRate,pmt);
+    const netAssetRentingHouse = getNetAssetRentingHouse(months,rentPrice,rentIncreaseRate,pmt,downPayment,financeCost);
 
-    const netAssetRentingHouse = loanAfterMonths;
-    const netAssetBuyingHouse = housePriceAfterMonths;
+    const assetBuyingHouseArr = fp.map(fp.range(11))(((year)=>getNetAssetBuyingHouse(year*12,housePrice,houseIncreaseRate,loan,loanRate,pmt)));
+    console.log(assetBuyingHouseArr);
 
     return (
       <View className='index'>
