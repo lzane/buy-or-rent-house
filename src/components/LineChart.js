@@ -5,17 +5,20 @@ import * as echarts from './ec-canvas/echarts'
 
 function setChartData(chart, data) {
   let option = {
-    color: ['#B1D2FF', '#F7CBF2'],
+    color: ['#f44336','#2196F3'],
     tooltip: {
       trigger: 'axis',
+      position: [10,10],
     },
     legend: {
-      data:['买房','租房']
+      data:['买房','租房'],
+      top: 10
     },
     grid: {
       left: '3%',
       right: '4%',
       bottom: '3%',
+      top: '15%',
       containLabel: true
     },
     xAxis: [{
@@ -40,6 +43,7 @@ function setChartData(chart, data) {
     }],
     yAxis: {
       type: 'value',
+      scale: true,
       axisLine: {
         show: true
       },

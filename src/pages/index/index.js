@@ -112,6 +112,12 @@ export default class Index extends Component {
   refLineChart = (node) => this.lineChart = node;
 
   updateDate(){
+    const {loanRate, loanYears, loan, houseIncreaseRate, housePrice, rentPrice, rentIncreaseRate, downPayment, financeCost} = this.state;
+    const pmt = finance.PMT(loanRate / 100 / 12, loanYears * 12, loan);
+    const years = 10;
+    this.assetBuyingHouseArr = fp.map((year) => getNetAssetBuyingHouse(year * 12, housePrice, houseIncreaseRate, loan, loanRate, pmt))(fp.range(1, years + 11))
+    this.assetRentingHouseArr = fp.map((year) => getNetAssetRentingHouse(year * 12, rentPrice, rentIncreaseRate, pmt, downPayment, financeCost))(fp.range(1, years + 1))
+
     let data = {
       dimensions: {
         name: '年数',
@@ -129,16 +135,13 @@ export default class Index extends Component {
   }
 
   render() {
-    const {loanRate, loanYears, loan, houseIncreaseRate, housePrice, rentPrice, rentIncreaseRate, downPayment, financeCost} = this.state;
-    const pmt = finance.PMT(loanRate / 100 / 12, loanYears * 12, loan);
-    const years = 10;
-    this.assetBuyingHouseArr = fp.map((year) => getNetAssetBuyingHouse(year * 12, housePrice, houseIncreaseRate, loan, loanRate, pmt))(fp.range(1, years + 11))
-    this.assetRentingHouseArr = fp.map((year) => getNetAssetRentingHouse(year * 12, rentPrice, rentIncreaseRate, pmt, downPayment, financeCost))(fp.range(1, years + 1))
     setTimeout(()=>{
       this.updateDate();
     },0)
     return (
       <View className='index'>
+        <LineChart ref={this.refLineChart} height='250px' />
+
         <AtForm>
           <AtInput
             name='housePrice'
@@ -242,10 +245,6 @@ export default class Index extends Component {
           </AtInput>
 
         </AtForm>
-
-        <View> 每月供款: {pmt} </View>
-        <LineChart ref={this.refLineChart} height='250px' />
-
       </View>
     )
   }
