@@ -5,6 +5,7 @@ import {Finance} from 'financejs'
 import fp from 'lodash/fp'
 
 import './index.scss'
+import LineChart from "../../components/LineChart";
 
 let finance = new Finance();
 const downPaymentPercentRange = [3, 5, 7];
@@ -27,22 +28,22 @@ function FV(rate, nper, pmt, pv, type) {
   return fv;
 }
 
-function getNetAssetBuyingHouse(months,housePrice,houseIncreaseRate,loan,loanRate,pmt){
+function getNetAssetBuyingHouse(months, housePrice, houseIncreaseRate, loan, loanRate, pmt) {
   const loanAfterMonths = FV(loanRate / 100 / 12, months, pmt, loan);
   const housePriceAfterMonths = FV(houseIncreaseRate / 100 / 12, months, 0, -housePrice);
 
   return housePriceAfterMonths + loanAfterMonths;
 }
 
-function getNetAssetRentingHouse(months, rentPrice, rentIncreaseRate, pmt, principle,financeCost) {
-  if(months === 0 ){
+function getNetAssetRentingHouse(months, rentPrice, rentIncreaseRate, pmt, principle, financeCost) {
+  if (months === 0) {
     return principle;
   }
   let acc = principle;
   for (let i = 1; i <= months; i++) {
-    let currentRentPrice = FV(rentIncreaseRate/100/12,i,0,-rentPrice);
+    let currentRentPrice = FV(rentIncreaseRate / 100 / 12, i, 0, -rentPrice);
     let realPmt = pmt + currentRentPrice;
-    acc = FV(financeCost/100/12,1,realPmt,-acc);
+    acc = FV(financeCost / 100 / 12, 1, realPmt, -acc);
   }
   return acc;
 }
@@ -96,6 +97,7 @@ export default class Index extends Component {
   }
 
   componentDidMount() {
+    
   }
 
   componentWillUnmount() {
@@ -107,17 +109,34 @@ export default class Index extends Component {
   componentDidHide() {
   }
 
+  refLineChart = (node) => this.lineChart = node;
+
+  updateDate(){
+    let data = {
+      dimensions: {
+        name: '年数',
+        data: ['1', '2', '3', '4', '5', '6', '7','8','9','10']
+      },
+      measures: [{
+        name: '买房',
+        data: this.assetBuyingHouseArr,
+      }, {
+        name: '租房',
+        data: this.assetRentingHouseArr,
+      }]
+    }
+    this.lineChart.refresh(data);
+  }
+
   render() {
-    const {loanRate, loanYears, loan, houseIncreaseRate, housePrice,rentPrice,rentIncreaseRate,downPayment,financeCost} = this.state;
+    const {loanRate, loanYears, loan, houseIncreaseRate, housePrice, rentPrice, rentIncreaseRate, downPayment, financeCost} = this.state;
     const pmt = finance.PMT(loanRate / 100 / 12, loanYears * 12, loan);
-    const months = 12*10;
-
-    const netAssetBuyingHouse = getNetAssetBuyingHouse(months,housePrice,houseIncreaseRate,loan,loanRate,pmt);
-    const netAssetRentingHouse = getNetAssetRentingHouse(months,rentPrice,rentIncreaseRate,pmt,downPayment,financeCost);
-
-    const assetBuyingHouseArr = fp.map(fp.range(11))(((year)=>getNetAssetBuyingHouse(year*12,housePrice,houseIncreaseRate,loan,loanRate,pmt)));
-    console.log(assetBuyingHouseArr);
-
+    const years = 10;
+    this.assetBuyingHouseArr = fp.map((year) => getNetAssetBuyingHouse(year * 12, housePrice, houseIncreaseRate, loan, loanRate, pmt))(fp.range(1, years + 11))
+    this.assetRentingHouseArr = fp.map((year) => getNetAssetRentingHouse(year * 12, rentPrice, rentIncreaseRate, pmt, downPayment, financeCost))(fp.range(1, years + 1))
+    setTimeout(()=>{
+      this.updateDate();
+    },0)
     return (
       <View className='index'>
         <AtForm>
@@ -224,10 +243,9 @@ export default class Index extends Component {
 
         </AtForm>
 
-        <AtButton type='primary'>点击计算</AtButton>
         <View> 每月供款: {pmt} </View>
-        <View> 买房10年净资产： {netAssetBuyingHouse} </View>
-        <View> 租房10年净资产： {netAssetRentingHouse} </View>
+        <LineChart ref={this.refLineChart} height='250px' />
+
       </View>
     )
   }
