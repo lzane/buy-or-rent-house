@@ -1,7 +1,7 @@
-import Taro, {Component} from '@tarojs/taro'
-import {View, Text} from '@tarojs/components'
-import {AtAccordion, AtInput, AtInputNumber, AtSlider, AtNoticebar, AtButton,AtMessage,AtIcon} from "taro-ui";
-import {Finance} from 'financejs'
+import Taro, { Component } from '@tarojs/taro'
+import { View, Text } from '@tarojs/components'
+import { AtAccordion, AtInput, AtInputNumber, AtSlider, AtNoticebar, AtButton, AtMessage, AtIcon, AtTag } from "taro-ui";
+import { Finance } from 'financejs'
 import fp from 'lodash/fp'
 
 import LineChart from "../../components/LineChart";
@@ -67,16 +67,22 @@ export default class Index extends Component {
       rentIncreaseRate: 5,
       financeCost: 5,
       open: true,
+      openModify: false,
+      slider: true,
     }
   }
 
 
   handleChange(item, value) {
-    console.log('item', value);
-    if (value === '-999' || value === -999) {
-      value = 0;
+    // console.log('item', value);
+    // if (value === '-999' || value === -999) {
+    //   value = 0;
+    // }
+    // console.log('item', value);
+
+    if (value === '-') {
+      return value;
     }
-    console.log('item', value);
 
     this.setState({
       [item]: Number(value)
@@ -85,7 +91,7 @@ export default class Index extends Component {
     return value
   }
 
-  handleSliderChange(item, {value}) {
+  handleSliderChange(item, { value }) {
     this.setState({
       [item]: Number(value)
     });
@@ -97,6 +103,10 @@ export default class Index extends Component {
 
   componentDidMount() {
     this.throttleUpdateData();
+    Taro.atMessage({
+      'message': '请在下方填写房价等基本信息',
+      'type': 'info',
+    })
   }
 
   componentWillUnmount() {
@@ -124,12 +134,17 @@ export default class Index extends Component {
 
   throttleUpdateData = fp.debounce(500)(this.updateData);
 
+
   updateData() {
-    const {loanRate, loanYears, loan, houseIncreaseRate, housePrice, rentPrice, rentIncreaseRate, downPayment, financeCost} = this.state;
+    const { loanRate, loanYears, loan, houseIncreaseRate, housePrice, rentPrice, rentIncreaseRate, downPayment, financeCost } = this.state;
     const pmt = finance.PMT(loanRate / 100 / 12, loanYears * 12, loan);
     const years = loanYears;
-    this.assetBuyingHouseArr = fp.map((year) => getNetAssetBuyingHouse(year * 12, housePrice, houseIncreaseRate, loan, loanRate, pmt))(fp.range(0, years + 1))
-    this.assetRentingHouseArr = fp.map((year) => getNetAssetRentingHouse(year * 12, rentPrice, rentIncreaseRate, pmt, downPayment, financeCost))(fp.range(0, years + 1))
+    const getNetAssetBuyingHouseByYear = (year) => getNetAssetBuyingHouse(year * 12, housePrice, houseIncreaseRate, loan, loanRate, pmt)
+    const getNetAssetRentingHouseByYear = (year) => getNetAssetRentingHouse(year * 12, rentPrice, rentIncreaseRate, pmt, downPayment, financeCost)
+    const toFixed2 = (number) => { return Number(number.toFixed(2)) }
+    const range = fp.range(0, years + 1);
+    this.assetBuyingHouseArr = fp.map(fp.flow(getNetAssetBuyingHouseByYear, toFixed2))(range)
+    this.assetRentingHouseArr = fp.map(fp.flow(getNetAssetRentingHouseByYear, toFixed2))(range)
 
     let data = {
       dimensions: {
@@ -151,10 +166,138 @@ export default class Index extends Component {
   render() {
     return (
       <View className='index'>
-        <View style={{width: '100%', height: '250px'}}>
-          <LineChart ref={this.refLineChart} height='250px'/>
+        <AtMessage />
+
+        <View style={{ width: '100%', height: '250px' }}>
+          <LineChart ref={this.refLineChart} height='250px' />
         </View>
 
+        <AtAccordion
+          open={this.state.openModify}
+          onClick={() => {
+            this.setState((state) => ({
+              openModify: !state.openModify
+            }))
+          }}
+          title='参数调整'
+          icon={{ value: 'filter', color: '#6392e5', size: '15' }}
+        >
+          {this.state.slider && <View style={{ marginTop: '10px' }}>
+            <View style={{ lineHeight: '15px', marginLeft: '15px' }}><Text
+              style={{ fontSize: '0.7rem' }}>房价上涨/下跌比率(%)</Text></View>
+            <AtSlider value={this.state.houseIncreaseRate} step={1} min={-20} max={20} showValue
+              onChange={this.handleSliderChange.bind(this, 'houseIncreaseRate')} />
+
+            <View style={{ lineHeight: '15px', marginLeft: '15px' }}><Text
+              style={{ fontSize: '0.7rem' }}>房租上涨/下跌比率(%)</Text></View>
+            <AtSlider value={this.state.rentIncreaseRate} step={1} min={-20} max={20} showValue
+              onChange={this.handleSliderChange.bind(this, 'rentIncreaseRate')} />
+
+            <View style={{ lineHeight: '15px', marginLeft: '15px' }}><Text
+              style={{ fontSize: '0.7rem' }}>投资年化收益率(%)</Text></View>
+            <AtSlider value={this.state.financeCost} step={1} min={-20} max={20} showValue
+              onChange={this.handleSliderChange.bind(this, 'financeCost')} />
+          </View>}
+
+
+
+          {!this.state.slider && <View style={{ marginTop: '10px' }}>
+            <AtInput
+              name='houseIncreaseRate'
+              title='房价上涨/下跌比率'
+              type='text'
+              placeholder='请输入数字'
+              value={this.state.houseIncreaseRate}
+              onChange={this.handleChange.bind(this, 'houseIncreaseRate')}
+            >
+              <Text> % </Text>
+            </AtInput>
+            <AtInput
+              name='rentIncreaseRate'
+              title='房租上涨/下跌比率'
+              type='text'
+              placeholder='请输入数字'
+              value={this.state.rentIncreaseRate}
+              onChange={this.handleChange.bind(this, 'rentIncreaseRate')}
+            >
+              <Text> % </Text>
+            </AtInput>
+            <AtInput
+              name='financeCost'
+              title='投资年化收益率'
+              type='text'
+              placeholder='请输入数字'
+              value={this.state.financeCost}
+              onChange={this.handleChange.bind(this, 'financeCost')}
+            >
+              <Text> % </Text>
+            </AtInput>
+          </View>
+          }
+
+          <View style={{
+            position: 'relative',
+            right: '12px',
+            textAlign: 'right',
+            marginTop: '5px',
+            marginBottom: '5px'
+          }}>
+            <AtTag
+              name='tag-1'
+              type='primary'
+              size='small'
+              circle
+              active
+              onClick={() => {
+                this.setState((state) => {
+                  return {
+                    slider: !state.slider
+                  }
+                })
+              }}
+            >
+              {this.state.slider? '输入小数？范围不够？':'回到滑竿模式'}
+            </AtTag>
+          </View>
+
+
+          {/* <View className='at-row at-row__justify--around' style={{textAlign: "center", marginTop: '10px'}}>
+          <View className='at-col at-col-4 at-col--wrap'>
+            <AtInputNumber
+              type='digit'
+              min={-999}
+              max={999}
+              step={1}
+              value={this.state.houseIncreaseRate}
+              onChange={this.handleChange.bind(this, 'houseIncreaseRate')}
+            />
+            <View style={{lineHeight: '15px'}}><Text style={{fontSize: '0.7rem'}}>房价上涨比率(%)</Text></View>
+          </View>
+          <View className='at-col at-col-4 at-col--wrap'>
+            <AtInputNumber
+              type='digit'
+              min={-999}
+              max={999}
+              step={1}
+              value={this.state.rentIncreaseRate}
+              onChange={this.handleChange.bind(this, 'rentIncreaseRate')}
+            />
+            <View style={{lineHeight: '15px'}}><Text style={{fontSize: '0.7rem'}}>房租上涨比率(%)</Text></View>
+          </View>
+          <View className='at-col at-col-4 at-col--wrap'>
+            <AtInputNumber
+              type='digit'
+              min={-999}
+              max={999}
+              step={1}
+              value={this.state.financeCost}
+              onChange={this.handleChange.bind(this, 'financeCost')}
+            />
+            <View style={{lineHeight: '15px'}}><Text style={{fontSize: '0.7rem'}}>投资年化收益率(%)</Text></View>
+          </View>
+        </View> */}
+
+        </AtAccordion>
 
         <AtAccordion
           open={this.state.open}
@@ -163,7 +306,7 @@ export default class Index extends Component {
               open: !state.open
             }))
           }}
-          title='基本信息录入'
+          title='信息录入'
           icon={{ value: 'edit', color: '#6392e5', size: '15' }}
         >
           <AtInput
@@ -221,75 +364,19 @@ export default class Index extends Component {
             onChange={this.handleChange.bind(this, 'rentPrice')}
           >
           </AtInput>
-          <AtButton type='primary' onClick={()=>{
-            this.setState({open: false});
-            Taro.atMessage({
-              'message': '左右滑动滑竿',
-              'type': 'info',
-            })
-            }}>填写完成</AtButton>
+          <AtButton
+            type='primary'
+            onClick={() => {
+              this.setState({ open: false, openModify: true });
+              Taro.atMessage({
+                'message': '左右滑动滑竿，调节参数。图表会实时计算更新',
+                'type': 'success',
+              })
+            }}
+            full>
+            填写完成
+            </AtButton>
         </AtAccordion>
-
-        <AtMessage />
-
-        {/* <AtNoticebar icon='volume-plus'>
-          记得在界面
-        </AtNoticebar> */}
-
-        <View style={{marginTop: '10px'}}>
-          <View style={{lineHeight: '15px', marginLeft: '15px'}}><Text
-            style={{fontSize: '0.7rem'}}>房价上涨/下跌比率(%)</Text></View>
-          <AtSlider value={this.state.houseIncreaseRate} step={1} min={-30} max={30} showValue
-                    onChange={this.handleSliderChange.bind(this, 'houseIncreaseRate')}/>
-
-          <View style={{lineHeight: '15px', marginLeft: '15px'}}><Text
-            style={{fontSize: '0.7rem'}}>房租上涨/下跌比率(%)</Text></View>
-          <AtSlider value={this.state.rentIncreaseRate} step={1} min={-30} max={30} showValue
-                    onChange={this.handleSliderChange.bind(this, 'rentIncreaseRate')}/>
-
-          <View style={{lineHeight: '15px', marginLeft: '15px'}}><Text
-            style={{fontSize: '0.7rem'}}>投资年化收益率(%)</Text></View>
-          <AtSlider value={this.state.financeCost} step={1} min={-30} max={30} showValue
-                    onChange={this.handleSliderChange.bind(this, 'financeCost')}/>
-        </View>
-
-
-        <View className='at-row at-row__justify--around' style={{textAlign: "center", marginTop: '10px'}}>
-          <View className='at-col at-col-4 at-col--wrap'>
-            <AtInputNumber
-              type='digit'
-              min={-999}
-              max={999}
-              step={1}
-              value={this.state.houseIncreaseRate}
-              onChange={this.handleChange.bind(this, 'houseIncreaseRate')}
-            />
-            <View style={{lineHeight: '15px'}}><Text style={{fontSize: '0.7rem'}}>房价上涨比率(%)</Text></View>
-          </View>
-          <View className='at-col at-col-4 at-col--wrap'>
-            <AtInputNumber
-              type='digit'
-              min={-999}
-              max={999}
-              step={1}
-              value={this.state.rentIncreaseRate}
-              onChange={this.handleChange.bind(this, 'rentIncreaseRate')}
-            />
-            <View style={{lineHeight: '15px'}}><Text style={{fontSize: '0.7rem'}}>房租上涨比率(%)</Text></View>
-          </View>
-          <View className='at-col at-col-4 at-col--wrap'>
-            <AtInputNumber
-              type='digit'
-              min={-999}
-              max={999}
-              step={1}
-              value={this.state.financeCost}
-              onChange={this.handleChange.bind(this, 'financeCost')}
-            />
-            <View style={{lineHeight: '15px'}}><Text style={{fontSize: '0.7rem'}}>投资年化收益率(%)</Text></View>
-          </View>
-        </View>
-
 
       </View>
     )
