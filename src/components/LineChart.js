@@ -2,7 +2,6 @@ import Taro, {Component} from '@tarojs/taro'
 import {View} from '@tarojs/components'
 import * as echarts from './ec-canvas/echarts'
 
-
 function setChartData(chart, data) {
   let option = {
     color: ['#f44336', '#2196F3'],

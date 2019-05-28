@@ -1,7 +1,5 @@
 import Taro, { Component } from '@tarojs/taro'
 import Index from './pages/index'
-
-import 'taro-ui/dist/style/index.scss'
 import './app.scss'
 
 
@@ -20,7 +18,7 @@ class App extends Component {
     window: {
       backgroundTextStyle: 'light',
       navigationBarBackgroundColor: '#fff',
-      navigationBarTitleText: 'WeChat',
+      navigationBarTitleText: '买不买房',
       navigationBarTextStyle: 'black'
     }
   }
