@@ -4,7 +4,7 @@ import * as echarts from './ec-canvas/echarts'
 
 function setChartData(chart, data) {
   let option = {
-    color: ['#f44336', '#2196F3'],
+    color: ['#f44336', '#6392e5'],
     tooltip: {
       trigger: 'axis',
       position: [10, 10],
