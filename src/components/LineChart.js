@@ -54,13 +54,17 @@ function setChartData(chart, data) {
         show: true
       },
       axisTick: {
-        show: false
+        show: true
       },
       axisLabel: {
         color: '#000'
       },
       splitLine: {
-        show: false,
+        show: true,
+        lineStyle: {
+          color: ['#D7D8DA'],
+          type: 'dashed'
+        }
       }
     },
     series: []
@@ -83,7 +87,7 @@ export default class LineChart extends Component {
     usingComponents: {
       'ec-canvas': './ec-canvas/ec-canvas'
     }
-  }
+  };
 
   constructor(props) {
     super(props)
@@ -93,36 +97,42 @@ export default class LineChart extends Component {
     ec: {
       lazyLoad: true
     }
-  }
-
+  };
 
   refresh(data) {
-    const {height} = this.props
-    const rect = this.Chart.parentNode.getBoundingClientRect()
-    const chart = echarts.init(this.Chart, null, {
-      width: rect.width,
-      height: height
-    });
-    setChartData(chart, data);
-    return chart;
+    if(Taro.getEnv()===Taro.ENV_TYPE.WEB){
+      const {height} = this.props
+      const rect = this.Chart.parentNode.getBoundingClientRect()
+      const chart = echarts.init(this.Chart, null, {
+        width: rect.width,
+        height: height
+      });
+      setChartData(chart, data);
+      return chart;
+    }
 
-    // this.Chart.init((canvas, width, height) => {
-    //   const chart = echarts.init(canvas, null, {
-    //     width: width,
-    //     height: height
-    //   });
-    //   setChartData(chart, data);
-    //   return chart;
-    // })
+    this.Chart.init((canvas, width, height) => {
+      console.log(canvas,width,height);
+      const chart = echarts.init(canvas, null, {
+        width: width,
+        height: height
+      });
+      setChartData(chart, data);
+      return chart;
+    })
   }
 
   refChart = (node) => {
     this.Chart = node
-  }
+  };
 
   render() {
     return (
-      <ec-canvas ref={this.refChart} canvas-id='mychart-area' ec={this.state.ec}/>
+      <ec-canvas
+        ref={this.refChart}
+        canvas-id='mychart-area'
+        ec={this.state.ec}
+      />
     )
   }
 }
