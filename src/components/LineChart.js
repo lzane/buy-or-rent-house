@@ -5,18 +5,18 @@ import * as echarts from './ec-canvas/echarts'
 
 function setChartData(chart, data) {
   let option = {
-    color: ['#f44336','#2196F3'],
+    color: ['#f44336', '#2196F3'],
     tooltip: {
       trigger: 'axis',
-      position: [10,10],
+      position: [10, 10],
     },
     legend: {
-      data:['买房','租房'],
+      data: ['买房', '租房'],
       top: 10
     },
     grid: {
       left: '3%',
-      right: '4%',
+      right: '5.5%',
       bottom: '3%',
       top: '15%',
       containLabel: true
@@ -24,6 +24,9 @@ function setChartData(chart, data) {
     xAxis: [{
       type: 'category',
       boundaryGap: false,
+      nameLocation: 'end',
+      nameGap: 5,
+      name: '年',
       axisLine: {
         show: true
       },
@@ -43,6 +46,9 @@ function setChartData(chart, data) {
     }],
     yAxis: {
       type: 'value',
+      nameLocation: 'end',
+      nameGap: 10,
+      name: '净资产',
       scale: true,
       axisLine: {
         show: true
@@ -91,11 +97,11 @@ export default class LineChart extends Component {
 
 
   refresh(data) {
-    const { height } = this.props
+    const {height} = this.props
     const rect = this.Chart.parentNode.getBoundingClientRect()
     const chart = echarts.init(this.Chart, null, {
-    width: rect.width,
-    height: height
+      width: rect.width,
+      height: height
     });
     setChartData(chart, data);
     return chart;
@@ -116,7 +122,7 @@ export default class LineChart extends Component {
 
   render() {
     return (
-      <ec-canvas ref={this.refChart} canvas-id='mychart-area' ec={this.state.ec} />
+      <ec-canvas ref={this.refChart} canvas-id='mychart-area' ec={this.state.ec}/>
     )
   }
 }

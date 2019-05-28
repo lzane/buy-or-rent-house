@@ -97,7 +97,7 @@ export default class Index extends Component {
   }
 
   componentDidMount() {
-    
+
   }
 
   componentWillUnmount() {
@@ -115,13 +115,13 @@ export default class Index extends Component {
     const {loanRate, loanYears, loan, houseIncreaseRate, housePrice, rentPrice, rentIncreaseRate, downPayment, financeCost} = this.state;
     const pmt = finance.PMT(loanRate / 100 / 12, loanYears * 12, loan);
     const years = 10;
-    this.assetBuyingHouseArr = fp.map((year) => getNetAssetBuyingHouse(year * 12, housePrice, houseIncreaseRate, loan, loanRate, pmt))(fp.range(1, years + 11))
-    this.assetRentingHouseArr = fp.map((year) => getNetAssetRentingHouse(year * 12, rentPrice, rentIncreaseRate, pmt, downPayment, financeCost))(fp.range(1, years + 1))
+    this.assetBuyingHouseArr = fp.map((year) => getNetAssetBuyingHouse(year * 12, housePrice, houseIncreaseRate, loan, loanRate, pmt))(fp.range(0, years + 11))
+    this.assetRentingHouseArr = fp.map((year) => getNetAssetRentingHouse(year * 12, rentPrice, rentIncreaseRate, pmt, downPayment, financeCost))(fp.range(0, years + 1))
 
     let data = {
       dimensions: {
         name: '年数',
-        data: ['1', '2', '3', '4', '5', '6', '7','8','9','10']
+        data: ['0','1', '2', '3', '4', '5', '6', '7','8','9','10']
       },
       measures: [{
         name: '买房',
@@ -204,6 +204,16 @@ export default class Index extends Component {
           </AtInput>
 
           <AtInput
+            name='rentPrice'
+            title='现在房租'
+            type='digit'
+            placeholder='请输入数字'
+            value={this.state.rentPrice}
+            onChange={this.handleChange.bind(this, 'rentPrice')}
+          >
+          </AtInput>
+
+          <AtInput
             name='houseIncreaseRate'
             title='房价上涨比率'
             type='digit'
@@ -214,15 +224,6 @@ export default class Index extends Component {
             <Text> % </Text>
           </AtInput>
 
-          <AtInput
-            name='rentPrice'
-            title='现在房租'
-            type='digit'
-            placeholder='请输入数字'
-            value={this.state.rentPrice}
-            onChange={this.handleChange.bind(this, 'rentPrice')}
-          >
-          </AtInput>
           <AtInput
             name='rentIncreaseRate'
             title='房租上涨比率'
