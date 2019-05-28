@@ -1,10 +1,11 @@
 import Taro, {Component} from '@tarojs/taro'
 import {View, Text} from '@tarojs/components'
-import {AtInput} from "taro-ui";
+import {AtAccordion, AtInput, AtInputNumber, AtSlider} from "taro-ui";
 import {Finance} from 'financejs'
 import fp from 'lodash/fp'
 
 import LineChart from "../../components/LineChart";
+import 'taro-ui/dist/style/index.scss' // 全局引入一次即可
 import './index.scss'
 
 let finance = new Finance();
@@ -66,15 +67,29 @@ export default class Index extends Component {
       rentPrice: 0.6,
       rentIncreaseRate: 5,
       financeCost: 5,
+      open: true,
     }
   }
 
 
   handleChange(item, value) {
+    console.log('item', value);
+    if (value === '-999' || value === -999) {
+      value = 0;
+    }
+    console.log('item', value);
+
     this.setState({
       [item]: Number(value)
     });
     // 在小程序中，如果想改变 value 的值，需要 `return value` 从而改变输入框的当前值
+    return value
+  }
+
+  handleSliderChange(item, {value}) {
+    this.setState({
+      [item]: Number(value)
+    });
     return value
   }
 
@@ -96,6 +111,12 @@ export default class Index extends Component {
 
   componentDidUpdate(prevProps, prevState, prevContext) {
     this.throttleUpdateData();
+  }
+
+  onShareAppMessage(res) {
+    return {
+      title: '买不买房',
+    }
   }
 
   refLineChart = (node) => {
@@ -135,107 +156,126 @@ export default class Index extends Component {
           <LineChart ref={this.refLineChart} height='250px'/>
         </View>
 
-        <AtInput
-          name='housePrice'
-          title='房屋总价'
-          type='digit'
-          placeholder='请输入数字'
-          value={this.state.housePrice}
-          onChange={this.handleChange.bind(this, 'housePrice')}
-        />
-        <AtInput
-          name='downPayment'
-          title='首付+额外支出'
-          type='digit'
-          placeholder='包含税费，中介费等。请输入数字'
-          value={this.state.downPayment}
-          onChange={this.handleChange.bind(this, 'downPayment')}
-        >
-        </AtInput>
-        <AtInput
-          name='housePrice'
-          title='贷款总额'
-          type='digit'
-          placeholder='请输入数字'
-          value={this.state.loan}
-          onChange={this.handleChange.bind(this, 'loan')}
-        />
-        {/*<Picker*/}
-        {/*  mode='selector' range={downPaymentPercentRange}*/}
-        {/*  onChange={this.handlePickerChange.bind(this, 'downPaymentPercent')}*/}
-        {/*  className='at-input'*/}
-        {/*>*/}
-        {/*  <View className='at-input__container'>*/}
-        {/*    <Text className='picker at-input__title'>*/}
-        {/*      首付成数*/}
-        {/*    </Text>*/}
-        {/*    <Text className='at-input__input'> {this.state.downPaymentPercent} </Text>*/}
-        {/*    <View className='at-input__children'><Text className='taro-text'> 成 </Text>*/}
-        {/*    </View>*/}
-        {/*  </View>*/}
-        {/*</Picker>*/}
-        <AtInput
-          name='loanRate'
-          title='房贷利率'
-          type='digit'
-          placeholder='请输入数字'
-          value={this.state.loanRate}
-          onChange={this.handleChange.bind(this, 'loanRate')}
-        >
-          <Text> % </Text>
-        </AtInput>
-        <AtInput
-          name='loanYears'
-          title='贷款年数'
-          type='number'
-          placeholder='请输入数字'
-          value={this.state.loanYears}
-          onChange={this.handleChange.bind(this, 'loanYears')}
-        >
-          <Text> 年 </Text>
-        </AtInput>
+        <View style={{marginTop: '10px'}}>
+          <View style={{lineHeight: '15px', marginLeft: '15px'}}><Text
+            style={{fontSize: '0.7rem'}}>房价上涨/下跌比率(%)</Text></View>
+          <AtSlider value={this.state.houseIncreaseRate} step={1} min={-30} max={30} showValue
+                    onChange={this.handleSliderChange.bind(this, 'houseIncreaseRate')}/>
 
-        <AtInput
-          name='rentPrice'
-          title='现在房租'
-          type='digit'
-          placeholder='请输入数字'
-          value={this.state.rentPrice}
-          onChange={this.handleChange.bind(this, 'rentPrice')}
-        >
-        </AtInput>
+          <View style={{lineHeight: '15px', marginLeft: '15px'}}><Text
+            style={{fontSize: '0.7rem'}}>房租上涨/下跌比率(%)</Text></View>
+          <AtSlider value={this.state.rentIncreaseRate} step={1} min={-30} max={30} showValue
+                    onChange={this.handleSliderChange.bind(this, 'rentIncreaseRate')}/>
 
-        <AtInput
-          name='houseIncreaseRate'
-          title='房价上涨比率'
-          type='digit'
-          placeholder='请输入数字'
-          value={this.state.houseIncreaseRate}
-          onChange={this.handleChange.bind(this, 'houseIncreaseRate')}
-        >
-          <Text> % </Text>
-        </AtInput>
+          <View style={{lineHeight: '15px', marginLeft: '15px'}}><Text
+            style={{fontSize: '0.7rem'}}>投资年化收益率(%)</Text></View>
+          <AtSlider value={this.state.financeCost} step={1} min={-30} max={30} showValue
+                    onChange={this.handleSliderChange.bind(this, 'financeCost')}/>
+        </View>
 
-        <AtInput
-          name='rentIncreaseRate'
-          title='房租上涨比率'
-          type='digit'
-          placeholder='请输入数字'
-          value={this.state.rentIncreaseRate}
-          onChange={this.handleChange.bind(this, 'rentIncreaseRate')}
+
+        <View className='at-row at-row__justify--around' style={{textAlign: "center", marginTop: '10px'}}>
+          <View className='at-col at-col-4 at-col--wrap'>
+            <AtInputNumber
+              type='digit'
+              min={-999}
+              max={999}
+              step={1}
+              value={this.state.houseIncreaseRate}
+              onChange={this.handleChange.bind(this, 'houseIncreaseRate')}
+            />
+            <View style={{lineHeight: '15px'}}><Text style={{fontSize: '0.7rem'}}>房价上涨比率(%)</Text></View>
+          </View>
+          <View className='at-col at-col-4 at-col--wrap'>
+            <AtInputNumber
+              type='digit'
+              min={-999}
+              max={999}
+              step={1}
+              value={this.state.rentIncreaseRate}
+              onChange={this.handleChange.bind(this, 'rentIncreaseRate')}
+            />
+            <View style={{lineHeight: '15px'}}><Text style={{fontSize: '0.7rem'}}>房租上涨比率(%)</Text></View>
+          </View>
+          <View className='at-col at-col-4 at-col--wrap'>
+            <AtInputNumber
+              type='digit'
+              min={-999}
+              max={999}
+              step={1}
+              value={this.state.financeCost}
+              onChange={this.handleChange.bind(this, 'financeCost')}
+            />
+            <View style={{lineHeight: '15px'}}><Text style={{fontSize: '0.7rem'}}>投资年化收益率(%)</Text></View>
+          </View>
+        </View>
+
+        <AtAccordion
+          open={this.state.open}
+          onClick={() => {
+            this.setState((state) => ({
+              open: !state.open
+            }))
+          }}
+          title='基本信息录入'
         >
-          <Text> % </Text>
-        </AtInput>
-        <AtInput
-          name='financeCost'
-          title='投资年化收益率'
-          type='digit'
-          placeholder='请输入数字'
-          value={this.state.financeCost}
-          onChange={this.handleChange.bind(this, 'financeCost')}
-        >
-          <Text> % </Text>
-        </AtInput>
+          <AtInput
+            name='housePrice'
+            title='房屋总价'
+            type='digit'
+            placeholder='请输入数字'
+            value={this.state.housePrice}
+            onChange={this.handleChange.bind(this, 'housePrice')}
+          />
+          <AtInput
+            name='downPayment'
+            title='首付+额外支出'
+            type='digit'
+            placeholder='包含税费，中介费等。请输入数字'
+            value={this.state.downPayment}
+            onChange={this.handleChange.bind(this, 'downPayment')}
+          >
+          </AtInput>
+          <AtInput
+            name='housePrice'
+            title='贷款总额'
+            type='digit'
+            placeholder='请输入数字'
+            value={this.state.loan}
+            onChange={this.handleChange.bind(this, 'loan')}
+          />
+          <AtInput
+            name='loanRate'
+            title='房贷利率'
+            type='digit'
+            placeholder='请输入数字'
+            value={this.state.loanRate}
+            onChange={this.handleChange.bind(this, 'loanRate')}
+          >
+            <Text> % </Text>
+          </AtInput>
+          <AtInput
+            name='loanYears'
+            title='贷款年数'
+            type='number'
+            placeholder='请输入数字'
+            value={this.state.loanYears}
+            onChange={this.handleChange.bind(this, 'loanYears')}
+          >
+            <Text> 年 </Text>
+          </AtInput>
+
+          <AtInput
+            name='rentPrice'
+            title='现在房租'
+            type='digit'
+            placeholder='请输入数字'
+            value={this.state.rentPrice}
+            onChange={this.handleChange.bind(this, 'rentPrice')}
+          >
+          </AtInput>
+        </AtAccordion>
+
       </View>
     )
   }

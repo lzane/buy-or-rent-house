@@ -1,13 +1,19 @@
 {
-  "miniprogramRoot": "./dist",
-  "projectname": "buy_or_rent_house",
-  "description": "买不买房计算器买房vs租房",
-  "appid": "touristappid",
-  "setting": {
-    "urlCheck": true,
-    "es6": false,
-    "postcss": false,
-    "minified": false
-  },
-  "compileType": "miniprogram"
+	"miniprogramRoot": "dist/",
+	"projectname": "buy-or-rent-house",
+	"description": "买不买房计算器买房vs租房",
+	"appid": "wxc3ba6c98bca4f520",
+	"setting": {
+		"urlCheck": true,
+		"es6": false,
+		"postcss": false,
+		"minified": false,
+		"newFeature": true,
+		"autoAudits": false,
+		"checkInvalidKey": true
+	},
+	"compileType": "miniprogram",
+	"simulatorType": "wechat",
+	"simulatorPluginLibVersion": {},
+	"condition": {}
 }
