@@ -164,13 +164,17 @@ export default class Index extends Component {
   }
 
   render() {
+    const { loanRate, loanYears, loan } = this.state;
+    const pmt = finance.PMT(loanRate / 100 / 12, loanYears * 12, loan);
     return (
       <View className='index'>
         <AtMessage />
 
+
         <View style={{ width: '100%', height: '250px' }}>
           <LineChart ref={this.refLineChart} height='250px' />
         </View>
+
 
         <AtAccordion
           open={this.state.openModify}
@@ -184,19 +188,25 @@ export default class Index extends Component {
         >
           {this.state.slider && <View style={{ marginTop: '10px' }}>
             <View style={{ lineHeight: '15px', marginLeft: '15px' }}><Text
-              style={{ fontSize: '0.7rem' }}>房价上涨/下跌比率(%)</Text></View>
+              style={{ fontSize: '0.7rem' }}
+            >房价上涨/下跌比率(%)</Text></View>
             <AtSlider value={this.state.houseIncreaseRate} step={1} min={-20} max={20} showValue
-              onChange={this.handleSliderChange.bind(this, 'houseIncreaseRate')} />
+              onChange={this.handleSliderChange.bind(this, 'houseIncreaseRate')}
+            />
 
             <View style={{ lineHeight: '15px', marginLeft: '15px' }}><Text
-              style={{ fontSize: '0.7rem' }}>房租上涨/下跌比率(%)</Text></View>
+              style={{ fontSize: '0.7rem' }}
+            >房租上涨/下跌比率(%)</Text></View>
             <AtSlider value={this.state.rentIncreaseRate} step={1} min={-20} max={20} showValue
-              onChange={this.handleSliderChange.bind(this, 'rentIncreaseRate')} />
+              onChange={this.handleSliderChange.bind(this, 'rentIncreaseRate')}
+            />
 
             <View style={{ lineHeight: '15px', marginLeft: '15px' }}><Text
-              style={{ fontSize: '0.7rem' }}>投资年化收益率(%)</Text></View>
+              style={{ fontSize: '0.7rem' }}
+            >投资年化收益率(%)</Text></View>
             <AtSlider value={this.state.financeCost} step={1} min={-20} max={20} showValue
-              onChange={this.handleSliderChange.bind(this, 'financeCost')} />
+              onChange={this.handleSliderChange.bind(this, 'financeCost')}
+            />
           </View>}
 
 
@@ -235,13 +245,26 @@ export default class Index extends Component {
           </View>
           }
 
+          <AtNoticebar style={{
+            fontSize: '0.6rem',
+            margin: '0 10px',
+          }}>
+            假设购买的房子现值<Text className='info_number'>{this.state.housePrice}</Text>，
+            首付(含税及其他)<Text className='info_number'>{this.state.downPayment}</Text>，
+            商业贷款<Text className='info_number'>{this.state.loan}</Text>，利率为<Text className='info_number'>{this.state.loanRate}%</Text>，分<Text className='info_number'>{this.state.loanYears}年</Text>还清，需要月供<Text className='info_number'>{-pmt.toFixed(2)}</Text>。
+            获得相同居住体验需要房租每月<Text className='info_number'>{this.state.rentPrice}</Text>，
+            按照房价变动每年<Text className='info_number'>{this.state.houseIncreaseRate}%</Text>，房租变动每年<Text className='info_number'>{this.state.rentIncreaseRate}%</Text>，年化投资回报率为<Text className='info_number'>{this.state.financeCost}%</Text>。
+            假设每个月支出相同，净资产随时间的变化如上图所示。
+          </AtNoticebar>
+
           <View style={{
             position: 'relative',
             right: '12px',
             textAlign: 'right',
             marginTop: '5px',
             marginBottom: '5px'
-          }}>
+          }}
+          >
             <AtTag
               name='tag-1'
               type='primary'
@@ -373,7 +396,8 @@ export default class Index extends Component {
                 'type': 'success',
               })
             }}
-            full>
+            full
+          >
             填写完成
             </AtButton>
         </AtAccordion>

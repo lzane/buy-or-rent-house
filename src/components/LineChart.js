@@ -1,5 +1,4 @@
 import Taro, {Component} from '@tarojs/taro'
-import {View} from '@tarojs/components'
 import * as echarts from './ec-canvas/echarts'
 
 function setChartData(chart, data) {
@@ -7,7 +6,7 @@ function setChartData(chart, data) {
     color: ['#f44336', '#6392e5'],
     tooltip: {
       trigger: 'axis',
-      position: [10, 10],
+      position: [50, 40],
     },
     legend: {
       data: ['买房', '租房'],
