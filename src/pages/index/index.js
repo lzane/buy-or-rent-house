@@ -51,17 +51,17 @@ function getNetAssetRentingHouse(months, rentPrice, rentIncreaseRate, pmt, princ
 export default class Index extends Component {
 
   config = {
-    navigationBarTitleText: '首页'
+    navigationBarTitleText: '买不买房'
   };
 
   constructor() {
     super(...arguments);
     this.state = {
       housePrice: 400,
-      loan: 251,
+      loan: 280,
       loanYears: 30,
       loanRate: 5.15,
-      downPayment: 160,
+      downPayment: 124,
       houseIncreaseRate: 3,
       rentPrice: 0.6,
       rentIncreaseRate: 5,
