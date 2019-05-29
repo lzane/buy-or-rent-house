@@ -110,7 +110,6 @@ export default class LineChart extends Component {
     }
 
     this.Chart.init((canvas, width, height) => {
-      console.log(canvas,width,height);
       const chart = echarts.init(canvas, null, {
         width: width,
         height: height

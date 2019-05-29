@@ -16,5 +16,33 @@
 	"simulatorType": "wechat",
 	"simulatorPluginLibVersion": {},
 	"libVersion": "2.3.0",
-	"condition": {}
+	"condition": {
+		"search": {
+			"current": -1,
+			"list": []
+		},
+		"conversation": {
+			"current": -1,
+			"list": []
+		},
+		"plugin": {
+			"current": -1,
+			"list": []
+		},
+		"game": {
+			"list": []
+		},
+		"miniprogram": {
+			"current": 0,
+			"list": [
+				{
+					"id": 0,
+					"name": "queryIn",
+					"pathName": "pages/index/index",
+					"query": "housePrice=420&loan=251&loanYears=30&loanRate=5.15&downPayment=160&houseIncreaseRate=3&rentPrice=0.6&rentIncreaseRate=5&financeCost=17&open=true&openModify=true&slider=true&",
+					"scene": null
+				}
+			]
+		}
+	}
 }

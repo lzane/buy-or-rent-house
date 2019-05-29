@@ -70,6 +70,7 @@ export default class Index extends Component {
       openModify: false,
       slider: true,
     }
+
   }
 
 
@@ -102,7 +103,28 @@ export default class Index extends Component {
   }
 
   componentDidMount() {
-    this.throttleUpdateData();
+     // 从url上读取state
+     const paramObj = fp.reduce((acc, key) => {
+      const value = this.$router.params[key];
+
+      if (value === "true") {
+        return Object.assign({}, acc, { [key]: true })
+      }
+
+      if (value === "false") {
+        return Object.assign({}, acc, { [key]: false })
+      }
+
+      return Object.assign({}, acc, { [key]: +value })
+    }, {})(Object.keys(this.$router.params))
+    
+    this.setState(paramObj,()=>{
+      this.throttleUpdateData();
+      this.forceUpdate();
+    })
+ 
+
+    
     Taro.atMessage({
       'message': '请在下方填写房价等基本信息',
       'type': 'info',
@@ -123,13 +145,29 @@ export default class Index extends Component {
   }
 
   onShareAppMessage(res) {
-    const query = fp.reduce((acc)=>{
 
-    },'')(Object.keys(this.state));
-    console.log(query);
+    // 将现在的state保存在url上
+    const queryKey = [
+      'housePrice',
+      'loan',
+      'loanYears',
+      'loanRate',
+      'downPayment',
+      'houseIncreaseRate',
+      'rentPrice',
+      'rentIncreaseRate',
+      'financeCost',
+      'open',
+      'openModify',
+      'slider',
+    ]
+    const query = fp.reduce((acc, key) => {
+      return `${acc}${key}=${this.state[key]}&`;
+    }, '')(queryKey);
+
     return {
       title: '买不买房？测试你现在是买房好还是租房好',
-      path: '/pages/index/index?'
+      path: `/pages/index/index?${query}`
     }
   }
 
@@ -284,7 +322,7 @@ export default class Index extends Component {
                 })
               }}
             >
-              {this.state.slider? '输入小数？范围不够？':'回到滑竿模式'}
+              {this.state.slider ? '输入小数？范围不够？' : '回到滑竿模式'}
             </AtTag>
           </View>
 
