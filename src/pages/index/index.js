@@ -117,13 +117,11 @@ export default class Index extends Component {
 
       return Object.assign({}, acc, { [key]: +value })
     }, {})(Object.keys(this.$router.params))
-    
+
     this.setState(paramObj,()=>{
       this.throttleUpdateData();
       this.forceUpdate();
     })
- 
-
     
     Taro.atMessage({
       'message': '请在下方填写房价等基本信息',
@@ -157,7 +155,7 @@ export default class Index extends Component {
       'rentPrice',
       'rentIncreaseRate',
       'financeCost',
-      'open',
+      // 'open',
       'openModify',
       'slider',
     ]
@@ -433,7 +431,7 @@ export default class Index extends Component {
           <AtButton
             type='primary'
             onClick={() => {
-              this.setState({ open: false, openModify: true });
+              this.setState({ openModify: true });
               Taro.atMessage({
                 'message': '左右滑动滑竿，调节参数。图表会实时计算更新',
                 'type': 'success',
