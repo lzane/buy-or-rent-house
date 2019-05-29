@@ -1,6 +1,6 @@
 import Taro, { Component } from '@tarojs/taro'
 import { View, Text } from '@tarojs/components'
-import { AtAccordion, AtInput, AtInputNumber, AtSlider, AtNoticebar, AtButton, AtMessage, AtIcon, AtTag } from "taro-ui";
+import { AtAccordion, AtInput, AtSlider, AtNoticebar, AtButton, AtMessage, AtTag } from "taro-ui";
 import { Finance } from 'financejs'
 import fp from 'lodash/fp'
 
@@ -123,8 +123,13 @@ export default class Index extends Component {
   }
 
   onShareAppMessage(res) {
+    const query = fp.reduce((acc)=>{
+
+    },'')(Object.keys(this.state));
+    console.log(query);
     return {
-      title: '买不买房',
+      title: '买不买房？测试你现在是买房好还是租房好',
+      path: '/pages/index/index?'
     }
   }
 
@@ -327,7 +332,7 @@ export default class Index extends Component {
           onClick={() => {
             this.setState((state) => ({
               open: !state.open
-            }))
+            }));
           }}
           title='信息录入'
           icon={{ value: 'edit', color: '#6392e5', size: '15' }}
@@ -394,6 +399,9 @@ export default class Index extends Component {
               Taro.atMessage({
                 'message': '左右滑动滑竿，调节参数。图表会实时计算更新',
                 'type': 'success',
+              })
+              Taro.pageScrollTo({
+                scrollTop: 0
               })
             }}
             full
